@@ -21,12 +21,34 @@ class Product {
 class ShoppingCart {
   items = [];
 
+  set cartItems(value) {
+    this.items = value;
+    this.totalOutput.innerHTML = `
+      <h2>Total: \s${this.totalAmout.toFixed(2)}</h2>
+    `
+  }
+
+  get totalAmout() {
+    const sum = this.items.reduce((prevValue, curItem) => {
+      return prevValue + curItem.price;
+    }, 0);
+    return sum;
+  }
+
+  addProduct(product) {
+    const updateItem = [...this.items];
+    updateItem.push(product);
+    this.cartItems = updateItem; //เป็นการเรียก setter
+
+  }
+
   render() {
     const cartEl = document.createElement('section')
     cartEl.innerHTML = `
       <h2>Total: \s${0}</h2>
       <button>Order Now</button>
     `
+    this.totalOutput = cartEl.querySelector("h2");
     cartEl.className = "cart";
     return cartEl;
   }
@@ -38,8 +60,7 @@ class ProductItem {
   }
 
   addToCart() {
-    console.log('Adding product to cart.')
-    console.log(this.product)
+    App.addProductToCart(this.product);
   }
 
   render() {
@@ -99,8 +120,8 @@ class ProductList {
 class Shop {
   render() {
     const renderHook = document.getElementById("app");
-    const cart = new ShoppingCart();
-    const cartEl = cart.render();
+    this.cart = new ShoppingCart();
+    const cartEl = this.cart.render();
     const productList = new ProductList();
     const prodListEl = productList.render();
 
@@ -109,7 +130,18 @@ class Shop {
   }
 }
 
-const shop = new Shop();
-shop.render();
+class App {
+  static cart;
+  
+  static init() {
+    const shop = new Shop();
+    shop.render();
+    this.cart = shop.cart;
+  }
+  static addProductToCart(product) {
+    this.cart.addProduct(product);
+  }
+}
 
+App.init();
 
