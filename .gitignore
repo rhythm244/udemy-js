@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# PDF
+oop/classes-and-instances.pdf
