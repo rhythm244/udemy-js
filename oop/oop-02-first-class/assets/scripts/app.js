@@ -18,7 +18,33 @@ class Product {
   }
 }
 
-class ShoppingCart {
+class ElementAttribute {
+  constructor(attrName, attrValue) {
+    this.name = attrName;
+    this.value = attrValue;
+  }
+}
+
+class Component {
+  constructor(renderHookId) {
+    this.hookId = renderHookId;
+  }
+  createRootElement(tag, cssClasses, attibutes) {
+    const rootElement = document.createElement(tag);
+    if (cssClasses) {
+      rootElement.className = cssClasses;
+    }
+    if ( attibutes && attibutes.length > 0 ) {
+      for ( const attr of attibutes) {
+        rootElement.setAttribute(attr.name, attr.value);
+      }
+    }
+    document.getElementById(this.hookId).append(rootElement);
+    return rootElement;
+  }
+}
+
+class ShoppingCart extends Component {
   items = [];
 
   set cartItems(value) {
@@ -35,6 +61,10 @@ class ShoppingCart {
     return sum;
   }
 
+  constructor(renderHookId) {
+    super(renderHookId); //ต้องเรียกเมื่อใช้ subclass
+  }
+
   addProduct(product) {
     const updateItem = [...this.items];
     updateItem.push(product);
@@ -43,19 +73,20 @@ class ShoppingCart {
   }
 
   render() {
-    const cartEl = document.createElement('section')
+    // const cartEl = document.createElement('section')
+    //inhertance
+    const cartEl = this.createRootElement('section', 'cart')
     cartEl.innerHTML = `
       <h2>Total: \s${0}</h2>
       <button>Order Now</button>
     `
     this.totalOutput = cartEl.querySelector("h2");
-    cartEl.className = "cart";
-    return cartEl;
   }
 }
 
-class ProductItem {
-  constructor(product) {
+class ProductItem extends Component{
+  constructor(product, renderHookId) {
+    super(renderHookId);
     this.product = product;
   }
 
@@ -64,8 +95,7 @@ class ProductItem {
   }
 
   render() {
-    const prodEl = document.createElement("li");
-      prodEl.className = "product-item";
+    const prodEl = this.createRootElement("li", 'product-item');
       prodEl.innerHTML = `
         <div>
           <img src="${this.product.imageUrl}" alt="${this.product.title}" >
@@ -80,13 +110,12 @@ class ProductItem {
       const addCartButton = prodEl.querySelector("button");
       //เวลาใช้ addEventListener แล้วเรียกฟังก์ชั่น this ในฟังก์ชั่นนั้นมันจะเป็น this ของฟังก์ชั่นนั้น เราจึงต้อง bind this ซึ่งเป็นของ class เริ่มต้นเข้าไปด้วยจะได้ส่งค่าเข้าได้ใน ฟังก์ชั่น addToCart ได้ 
       addCartButton.addEventListener("click", this.addToCart.bind(this));
-      return prodEl;
   }
 
 
 }
 
-class ProductList {
+class ProductList extends Component {
   products = [
     new Product(
       "A Pillow",
@@ -102,31 +131,29 @@ class ProductList {
     ),
   ];
 
-  constructor() {}
+  constructor(renderHookId) {
+    super(renderHookId);
+  }
 
   render() {
     
-    const prodList = document.createElement("ul");
-    prodList.className = "product-list";
+    this.createRootElement("ul", "product-list", [
+      new ElementAttribute("id", "prod-list")
+    ]);
     for (const prod of this.products) {
-      const productItem = new ProductItem(prod);
-      const prodEl = productItem.render()
-      prodList.append(prodEl);
+      const productItem = new ProductItem(prod, 'prod-list');
+      productItem.render()
     }
-    return prodList;
   }
 }
 
 class Shop {
   render() {
-    const renderHook = document.getElementById("app");
-    this.cart = new ShoppingCart();
-    const cartEl = this.cart.render();
-    const productList = new ProductList();
-    const prodListEl = productList.render();
+    this.cart = new ShoppingCart('app');
+    this.cart.render();
+    const productList = new ProductList('app');
+    productList.render();
 
-    renderHook.append(cartEl);
-    renderHook.append(prodListEl);
   }
 }
 
@@ -138,6 +165,7 @@ class App {
     shop.render();
     this.cart = shop.cart;
   }
+  //ตรงนี้แม่งโคตรงง
   static addProductToCart(product) {
     this.cart.addProduct(product);
   }
