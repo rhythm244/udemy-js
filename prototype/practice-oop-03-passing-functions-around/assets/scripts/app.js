@@ -13,9 +13,59 @@ class DomHelper {
   }
 }
 
-class Tooltip {}
+class Component {
+  constructor(hostElementId, insertBefore = false ) {
+    if ( hostElementId ) {
+      this.hostElement = document.getElementById(hostElementId);
+    } else {
+      this.hostElement = documnet.body;
+    }
+
+    this.insertBefore = insertBefore;
+  }
+  
+  detach () {
+    if (this.element){
+      this.element.remove();
+    }
+  }
+  
+  attach() {
+    // document.body.append(this.element)
+    this.hostElement.insertAdjacentElement(
+      this.insertBefore ? "afterbegin" : "beforend",
+      this.element
+    );
+  }
+}
+
+class Tooltip extends Component{
+  constructor(closeNotifyFn){
+    super('active-projects', true);
+    this.cloneNotifyHandler = closeNotifyFn;
+    this.create();
+  }
+
+  closeTooltip = () => {
+    this.detach();
+    this.cloneNotifyHandler(); // มันคือ anonymous function บน line 81 ที่ถูกส่งมาจาก new Tooltip 
+  }
+
+  create() {
+    console.log("Tooltip....")
+    const tooltipElement = document.createElement("div");
+    tooltipElement.className = "card";
+    tooltipElement.textContent = 'DUMMY';
+    tooltipElement.addEventListener('click', this.closeTooltip)
+    this.element = tooltipElement;
+    
+  }
+  
+}
 
 class ProjectItem {
+  hasActiveTooltip = false;
+  
   constructor(id, updateProjectListsFunction, type) {
     this.id = id;
     this.updateProjectListsHandler = updateProjectListsFunction;
@@ -23,7 +73,23 @@ class ProjectItem {
     this.connectSwitchButton(type);
   }
 
-  connectMoreInfoButton() {}
+  showMoreInfoHandler() {
+    if (this.hasActiveTooltip){
+      return;
+    }
+    console.log("showMoreInfoHandler....")
+    const tooltip = new Tooltip(() => {
+      this.hasActiveTooltip = false;
+    });
+    tooltip.attach();
+    this.hasActiveTooltip = true;
+  }
+
+  connectMoreInfoButton() {
+    const projectItemElement = document.getElementById(this.id);
+    const moreInfoBtn = projectItemElement.querySelector('button:first-of-type');
+    moreInfoBtn.addEventListener('click', this.showMoreInfoHandler)
+  }
 
   connectSwitchButton(type) {
     const projectItemElement = document.getElementById(this.id);
@@ -50,7 +116,6 @@ class ProjectList {
         new ProjectItem(prjItem.id, this.switchProject.bind(this), this.type)
       );
     }
-    console.log(this.projects);
   }
 
   setSwitchHandlerFunction(switchHandlerFunction) {
@@ -66,7 +131,6 @@ class ProjectList {
   switchProject(projectId) {
     // const projectIndex = this.projects.findIndex(p => p.id === projectId);
     // this.projects.splice(projectIndex, 1);
-    console.log(projectId)
     this.switchHandler(this.projects.find(p => p.id === projectId));
     this.projects = this.projects.filter(p => p.id !== projectId);
   }
