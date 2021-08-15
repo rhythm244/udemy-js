@@ -8,7 +8,7 @@
             "type": "pwa-chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "${workspaceFolder}/prototype/practice-oop-03-passing-functions-around/index.html",
+            "url": "${workspaceFolder}/event/events-01-starting-setup/events.html",
         }
     ]
 }

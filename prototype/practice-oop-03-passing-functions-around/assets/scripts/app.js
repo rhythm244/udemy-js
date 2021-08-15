@@ -80,7 +80,7 @@ class ProjectItem {
     console.log("showMoreInfoHandler....")
     const tooltip = new Tooltip(() => {
       this.hasActiveTooltip = false;
-    });
+    }, this.id);
     tooltip.attach();
     this.hasActiveTooltip = true;
   }
