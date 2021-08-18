@@ -8,7 +8,7 @@
             "type": "pwa-chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "${workspaceFolder}/event/events-01-starting-setup/events.html",
+            "url": "${workspaceFolder}/promise/async-07-error-handling/index.html",
         }
     ]
 }
